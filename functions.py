@@ -4,6 +4,18 @@ import requests
 import  json
 from main import *
 
+def logger(func):
+    def wrapper(*args, **kwargs):
+        result=None
+        with open('logs.txt', 'a') as f:
+            try:
+                result = func(*args,**kwargs)
+                f.write(f'|{func.__name__}|{args},{kwargs}|{result}|True|\n')
+                return result
+            except:
+                f.write(f'|{func.__name__}|{args},{kwargs}|{result}|False|\n')
+    return wrapper
+
 def learningBot(update):
     while True:
         with open('bot.txt','a+') as f:
@@ -25,7 +37,7 @@ def learningBot(update):
                     exit()
             else:
                 print(data_dict[question])
-
+@logger
 def news():
     response = requests.get('https://oxu.az/')
     soup = BeautifulSoup(response.text, features = 'html.parser')
@@ -35,7 +47,7 @@ def news():
     for x in range(len(news_list)):
         s+=news_list[x].text+ ' '+ f"https://oxu.az/{news_links[x]['href']}\n"
     return s
-
+@logger
 def exchange():
     response = requests.get('https://api.exchangeratesapi.io/latest?base=TRY')
     response_dict = response.json()
@@ -45,7 +57,7 @@ def exchange():
         s+= f"{x} {response_dict['rates'][x]}\n"
     return s
 
-
+@logger
 def weatherInfo():
     response = requests.get('https://api.openweathermap.org/data/2.5/weather?q=Baku&appid=61389a93f65b06e891a9fac33362e797')
     response_dict = response.json()
@@ -53,7 +65,7 @@ def weatherInfo():
     for x in response_dict:
         s += f"{x} {response_dict[x]}"
     return s
-
+@logger
 def googleRequest(word):
     text = word
     response = requests.get(f'https://www.google.com/search?q={text}')
